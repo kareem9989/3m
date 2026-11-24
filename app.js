@@ -111,9 +111,14 @@ $('bClear').onclick=()=>{if(!cur.lines.length&&!cur.table){cur=newOrder();render
 $('bHold').onclick=()=>{
   if(!cur.lines.length)return toast('الطلب فاضي');
   if(!cur.table)return toast('اختاري الطاولة الأول');
-  S.open[cur.table]=cur;sendKitchen(true);save();toast('اتحفظ على طاولة '+cur.table);cur=newOrder();renderCart();
+  S.open[cur.table]=cur;save();toast('اتحفظ على طاولة '+cur.table);cur=newOrder();renderCart();
 };
-$('bSend').onclick=()=>{if(!sendKitchen(false))toast('مفيش أصناف جديدة تتبعت');else{syncTable();renderCart()}};
+$('bSend').onclick=()=>{if(!cur.lines.length)return toast('الطلب فاضي');if(!sendKitchen(false,true))toast('كل الأصناف اتطبعلها بون قبل كده');else{syncTable();renderCart()}};
+$('bBill').onclick=()=>{
+  if(!cur.lines.length)return toast('الطلب فاضي');
+  const t=calc(cur);
+  printHTML(receipt({no:'—',at:Date.now(),type:cur.type,table:cur.type==='dine'?cur.table:'',cust:cur.cust,phone:cur.phone,addr:cur.addr,cashier:S.shift?S.shift.cashier:'',lines:cur.lines,...t,pay:null}));
+};
 
 /* printing */
 function printHTML(body,kind){
@@ -123,10 +128,10 @@ function printHTML(body,kind){
   const fr=$('pf');const d=fr.contentDocument;d.open();d.write(html);d.close();
   setTimeout(()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch(e){toast('الطباعة مش متاحة في المتصفح ده')}},300);
 }
-function sendKitchen(silent){
+function sendKitchen(silent,force){
   const pend=cur.lines.filter(l=>l.qty>(l.sent||0));
   if(!pend.length)return false;
-  if(S.settings.kt==='1'){
+  if(S.settings.kt==='1'||force){
     const by={};pend.forEach(l=>(by[l.station]=by[l.station]||[]).push(l));
     const head=cur.type==='dine'?`طاولة ${esc(cur.table||'-')}`:TY[cur.type]+(cur.cust?' — '+esc(cur.cust):'');
     const body=Object.entries(by).map(([s,ls])=>`<h1>بون ${ST[s]}</h1><div class="c big">${head}</div><div class="c">${dt(Date.now())}</div><div class="hr"></div><table>${ls.map(l=>`<tr class="k"><td class="b">${l.qty-(l.sent||0)} ×</td><td>${esc(l.name)}${l.note?`<br><small>(${esc(l.note)})</small>`:''}</td></tr>`).join('')}</table><div class="hr"></div><div style="page-break-after:always"></div>`).join('');
@@ -139,11 +144,11 @@ function sendKitchen(silent){
 function receipt(v,copy){
   const s=S.settings;
   return `<h1>${esc(s.name)}</h1>${s.addr?`<div class="c">${esc(s.addr)}</div>`:''}${s.phone?`<div class="c">${esc(s.phone)}</div>`:''}${s.taxNo?`<div class="c">رقم ضريبي: ${esc(s.taxNo)}</div>`:''}<div class="hr"></div>
-  <table><tr><td>فاتورة رقم</td><td class="r b">${v.no}</td></tr><tr><td>التاريخ</td><td class="r">${dt(v.at)}</td></tr><tr><td>النوع</td><td class="r">${TY[v.type]}${v.table?' — طاولة '+esc(v.table):''}</td></tr>${v.cust?`<tr><td>العميل</td><td class="r">${esc(v.cust)}</td></tr>`:''}${v.phone?`<tr><td>تليفون</td><td class="r">${esc(v.phone)}</td></tr>`:''}${v.addr?`<tr><td>العنوان</td><td class="r">${esc(v.addr)}</td></tr>`:''}<tr><td>الكاشير</td><td class="r">${esc(v.cashier)}</td></tr></table>
+  <table>${v.pay?`<tr><td>فاتورة رقم</td><td class="r b">${v.no}</td></tr>`:''}<tr><td>التاريخ</td><td class="r">${dt(v.at)}</td></tr><tr><td>النوع</td><td class="r">${TY[v.type]}${v.table?' — طاولة '+esc(v.table):''}</td></tr>${v.cust?`<tr><td>العميل</td><td class="r">${esc(v.cust)}</td></tr>`:''}${v.phone?`<tr><td>تليفون</td><td class="r">${esc(v.phone)}</td></tr>`:''}${v.addr?`<tr><td>العنوان</td><td class="r">${esc(v.addr)}</td></tr>`:''}<tr><td>الكاشير</td><td class="r">${esc(v.cashier)}</td></tr></table>
   <div class="hr"></div><table><tr class="b"><td>الصنف</td><td>كمية</td><td class="r">المبلغ</td></tr>${v.lines.map(l=>`<tr><td>${esc(l.name)}${l.note?`<br><small>${esc(l.note)}</small>`:''}</td><td>${l.qty}</td><td class="r">${f(l.price*l.qty)}</td></tr>`).join('')}</table><div class="hr"></div>
   <table><tr><td>المجموع</td><td class="r">${f(v.sub)}</td></tr>${v.disc?`<tr><td>خصم</td><td class="r">- ${f(v.disc)}</td></tr>`:''}${v.svc?`<tr><td>خدمة</td><td class="r">${f(v.svc)}</td></tr>`:''}${v.tax?`<tr><td>ضريبة</td><td class="r">${f(v.tax)}</td></tr>`:''}${v.del?`<tr><td>توصيل</td><td class="r">${f(v.del)}</td></tr>`:''}<tr class="big"><td>الإجمالي</td><td class="r">${f(v.total)} ج.م</td></tr>
-  <tr><td>طريقة الدفع</td><td class="r">${PM[v.pay.method]}</td></tr>${v.pay.method==='cash'?`<tr><td>المدفوع</td><td class="r">${f(v.pay.received)}</td></tr><tr><td>الباقي</td><td class="r">${f(v.pay.change)}</td></tr>`:''}</table>
-  <div class="hr"></div><div class="c b">${esc(s.foot)}</div>${copy?'<div class="c">— نسخة —</div>':''}`;
+  ${v.pay?`<tr><td>طريقة الدفع</td><td class="r">${PM[v.pay.method]}</td></tr>`:''}${v.pay&&v.pay.method==='cash'?`<tr><td>المدفوع</td><td class="r">${f(v.pay.received)}</td></tr><tr><td>الباقي</td><td class="r">${f(v.pay.change)}</td></tr>`:''}</table>
+  <div class="hr"></div>${v.pay?'':'<div class="c big">حساب مبدئي — غير مدفوع</div>'}<div class="c b">${esc(s.foot)}</div>${copy?'<div class="c">— نسخة —</div>':''}`;
 }
 
 /* payment */
@@ -283,7 +288,7 @@ function show(v){
 }
 $('nav').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.v)};
 $('mb').onclick=e=>{if(e.target.id==='mb')closeM()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();const k={F1:'pos',F2:'tables',F3:'inv',F4:'shift',F6:'menu',F7:'set'}[e.key];if(k){e.preventDefault();closeM();show(k)}});
 function renderHead(){document.documentElement.dataset.th=S.settings.theme||'gold';$('hName').textContent=S.settings.name;$('hShift').textContent=S.shift?`وردية ${S.shift.cashier} — من ${new Date(S.shift.openedAt).toLocaleTimeString('ar-EG',{timeStyle:'short'})}`:'لا توجد وردية مفتوحة';document.title=S.settings.name+' — الكاشير'}
 const tick=()=>$('clock').textContent=new Date().toLocaleString('ar-EG',{weekday:'long',hour:'2-digit',minute:'2-digit'});
 setInterval(tick,30000);tick();
