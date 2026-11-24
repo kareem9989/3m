@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-th="gold">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3M Cafe — الكاشير</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="logo.jpg">
+</head>
+<body>
+<header>
+  <img src="logo.jpg" alt="3M Cafe">
+  <div class="brand"><b id="hName">3M Cafe</b><small id="hShift">لا توجد وردية مفتوحة</small></div>
+  <nav id="nav">
+    <button data-v="pos" class="on">الكاشير</button>
+    <button data-v="tables">الطاولات</button>
+    <button data-v="inv">الفواتير</button>
+    <button data-v="shift">الوردية</button>
+    <button data-v="menu">المنيو</button>
+    <button data-v="set">الإعدادات</button>
+  </nav>
+  <div id="clock"></div>
+</header>
+<main>
+  <section class="view on" id="v-pos">
+    <div class="pos">
+      <div class="left">
+        <input id="search" placeholder="ابحث عن صنف…">
+        <div class="cats" id="cats"></div>
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="cart">
+        <div class="seg" id="seg">
+          <button data-t="dine">صالة</button><button data-t="take">تيك أواي</button><button data-t="del">دليفري</button>
+        </div>
+        <div class="meta" id="meta"></div>
+        <div class="lines" id="lines"></div>
+        <div class="tot" id="tot"></div>
+        <div class="acts">
+          <button id="bDisc">خصم</button>
+          <button id="bClear" class="ghost">مسح الطلب</button>
+          <button id="bSend">إرسال للتحضير</button>
+          <button id="bHold">حفظ على الطاولة</button>
+          <button id="bPay" class="gold wide">دفع وطباعة الفاتورة</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="view" id="v-tables"><h2>الطاولات</h2><div class="tbls" id="tbls"></div></section>
+  <section class="view" id="v-inv">
+    <div class="box">
+      <h2>الفواتير</h2>
+      <div class="row">
+        <div><label>من تاريخ</label><input type="date" id="fFrom"></div>
+        <div><label>إلى تاريخ</label><input type="date" id="fTo"></div>
+        <div><label>بحث (رقم / عميل)</label><input id="fQ"></div>
+      </div>
+    </div>
+    <div class="kpis" id="invK"></div>
+    <div class="box scroll"><table id="invT"></table></div>
+  </section>
+  <section class="view" id="v-shift"><div id="shiftBox"></div></section>
+  <section class="view" id="v-menu">
+    <div class="box">
+      <h2>الأقسام</h2>
+      <div class="row"><input id="newCat" placeholder="اسم قسم جديد"><button class="gold" id="addCat" style="flex:0 0 auto">إضافة قسم</button></div>
+      <div id="catList" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+    </div>
+    <div class="box">
+      <h2>الأصناف</h2>
+      <div class="row">
+        <div><label>اسم الصنف</label><input id="iName"></div>
+        <div><label>السعر</label><input id="iPrice" type="number" min="0" step="0.5" inputmode="decimal"></div>
+        <div><label>القسم</label><select id="iCat"></select></div>
+        <div><label>مكان التحضير</label><select id="iSt"><option value="bar">البار</option><option value="kitchen">المطبخ</option><option value="shisha">الشيشة</option></select></div>
+        <button class="gold" id="iSave" style="flex:0 0 auto">حفظ الصنف</button>
+      </div>
+      <div class="scroll" style="margin-top:12px"><table id="itemT"></table></div>
+    </div>
+  </section>
+  <section class="view" id="v-set">
+    <div class="box">
+      <h2>بيانات الكافيه والفاتورة</h2>
+      <div class="row">
+        <div><label>اسم الكافيه</label><input id="sName"></div>
+        <div><label>العنوان</label><input id="sAddr"></div>
+        <div><label>التليفون</label><input id="sPhone"></div>
+      </div>
+      <div class="row">
+        <div><label>رسالة آخر الفاتورة</label><input id="sFoot"></div>
+        <div><label>الرقم الضريبي (اختياري)</label><input id="sTaxNo"></div>
+      </div>
+      <div class="row">
+        <div><label>خدمة الصالة %</label><input id="sSvc" type="number" min="0" step="0.5"></div>
+        <div><label>ضريبة %</label><input id="sTax" type="number" min="0" step="0.5"></div>
+        <div><label>رسوم التوصيل</label><input id="sDel" type="number" min="0" step="1"></div>
+        <div><label>عدد الطاولات</label><input id="sTables" type="number" min="1" max="100"></div>
+      </div>
+      <div class="row">
+        <div><label>عرض ورق الطابعة</label><select id="sW"><option value="80">80 مم</option><option value="58">58 مم</option></select></div>
+        <div><label>ألوان السيستم</label><select id="sTh"><option value="gold">أبيض ودهبي</option><option value="leb">لبناني (أحمر وأبيض)</option><option value="coffee">بني قهوة</option><option value="night">ليلي (غامق)</option></select></div>
+        <div><label>طباعة بون التحضير للبار/المطبخ</label><select id="sKt"><option value="1">نعم</option><option value="0">لا</option></select></div>
+        <div class="desk"><label>طابعة الفواتير</label><select id="sPr"></select></div>
+        <div class="desk"><label>طابعة البار/المطبخ</label><select id="sKPr"></select></div>
+        <div><label>رقم سري للمدير (للإلغاء والمنيو والإعدادات)</label><input id="sPin" type="password" inputmode="numeric" placeholder="اتركه فاضي لو مش محتاجه"></div>
+      </div>
+      <div class="mbtns"><button class="gold" id="sSave">حفظ الإعدادات</button></div>
+    </div>
+    <div class="box">
+      <h2>نسخة احتياطية</h2>
+      <p style="color:var(--mut);margin-top:0">كل البيانات محفوظة على الجهاز ده بس (في البرنامج بيتعمل نسخة تلقائية كل يوم كمان). خدي نسخة احتياطية كل يوم أو كل أسبوع واحفظيها على فلاشة أو جوجل درايف.</p>
+      <div class="mbtns">
+        <button class="gold" id="bExp">تنزيل نسخة احتياطية</button>
+        <label style="flex:1;margin:0"><input type="file" id="bImp" accept=".json" style="display:none"><span class="pill" style="display:flex;min-height:44px;align-items:center;justify-content:center;border-radius:10px;cursor:pointer">استرجاع نسخة</span></label>
+        <button class="desk" id="bFolder">فتح فولدر النسخ التلقائية</button>
+        <button class="red" id="bReset">مسح كل البيانات</button>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="mb"><div id="md"></div></div>
+<div id="toast"></div>
+<iframe id="pf" title="print"></iframe>
+<script src="app.js"></script>
+</body>
+</html>
